@@ -4,10 +4,18 @@ const URL = process.argv[2];
 const SCRIBE = process.argv[3];
 
 /**
- * 1. [x] use process.argv to get the arguments
- * 1. [x] use request to GET a resource from a url
- * 2. [x] use fs to write to a local file --> callback function called from within
- * 3. [x] use fs.stat() to record how many bytes the packet is and log it to console.
+ * How to use   -> run from the commmmand line: `node fetcher.js [URL] [file PATH]`
+ * Dependencies -> (a) process.argv (b) fs (c) request [npm package]
+ * Behaviour    -> 1. uses request to GET a resource from a url
+ *                 2. uses fs to write to a local file --> callback function called from within
+ *                 3. uses fs.stat() to record how many bytes the packet is and log it to console.
+ *                 4. uses process.argv to get the arguments
+ *                 5. checks file path - if incorect throw err - line 31
+ */
+/** STATUS CODES **\
+ *  ==============================================================================
+ * 403 - forbidden            | understands request but rejects it. Similar to 401
+ * 200 - HTTP 200 OK success  | indicates that the request has succeeded
  */
 
 /// logs the file size
@@ -28,7 +36,8 @@ const writeTo = function(file, data) {
 
 /// async request data
 request(URL, (error, response, body) => {
-  console.log('error:', error); // Print the error if one occurred
-  console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-  writeTo(SCRIBE, body); // save to file
+  if (error) console.log('error:', error); // Print the error if one occurred
+  if (response.statusCode === 200) writeTo(SCRIBE, body); // save to file
+  else console.log(`Failed to write web page --> statusCode: ${response.statusCode}`);
 });
+
